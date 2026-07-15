@@ -144,7 +144,7 @@ export default function ProductFormPage() {
   if (loadingProduct) {
     return <div className="py-16 flex justify-center"><Spinner /></div>;
   }
-
+console.log('[ProductFormPage] render at', performance.now());
   return (
     <>
       <PageHeader title={isEdit ? 'Edit Product' : 'Add Product'} />
