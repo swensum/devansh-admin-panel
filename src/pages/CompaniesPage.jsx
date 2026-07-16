@@ -5,7 +5,7 @@ export default function CompaniesPage() {
   return (
     <>
       <PageHeader title="Companies" description="Brands/manufacturers products can be attributed to." />
-      <LookupManager collectionPath="companies" itemLabel="Company" />
+      <LookupManager collectionPath="companies" itemLabel="Company" hasImage />
     </>
   );
 }
