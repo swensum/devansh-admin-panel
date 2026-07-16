@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Button, Field, Input } from '../components/ui';
+import { Button, Field, Input, Checkbox } from '../components/ui';
 
 export default function LoginPage() {
   const { signIn } = useAuth();
@@ -9,6 +9,7 @@ export default function LoginPage() {
   const location = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -16,7 +17,7 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    const err = await signIn(email, password);
+    const err = await signIn(email, password, rememberMe);
     setLoading(false);
     if (err) {
       setError(err);
@@ -75,6 +76,13 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
               />
             </Field>
+
+            <Checkbox
+              label="Remember me on this device"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="mb-5"
+            />
 
             {error && (
               <p className="text-sm text-danger mb-4" role="alert">

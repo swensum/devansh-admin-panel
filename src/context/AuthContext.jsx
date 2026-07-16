@@ -3,6 +3,9 @@ import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
+  setPersistence,
+  browserLocalPersistence,
+  browserSessionPersistence,
 } from 'firebase/auth';
 import { auth } from '../firebase';
 
@@ -24,8 +27,11 @@ export function AuthProvider({ children }) {
     return unsub;
   }, []);
 
-  async function signIn(email, password) {
+  // rememberMe = true  -> stays signed in across browser restarts (persists in localStorage)
+  // rememberMe = false -> signed out once the browser/tab is closed (sessionStorage only)
+  async function signIn(email, password, rememberMe = true) {
     try {
+      await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
       await signInWithEmailAndPassword(auth, email, password);
       return null;
     } catch (err) {
