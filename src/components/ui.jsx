@@ -1,3 +1,16 @@
+export function Checkbox({ label, className = '', ...props }) {
+  return (
+    <label className={`flex items-center gap-2 cursor-pointer select-none ${className}`}>
+      <input
+        type="checkbox"
+        className="w-4 h-4 rounded border-border bg-surface-alt text-amber accent-amber focus-visible:outline-amber"
+        {...props}
+      />
+      <span className="text-sm text-muted">{label}</span>
+    </label>
+  );
+}
+
 export function Button({ variant = 'primary', className = '', ...props }) {
   const base = 'inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium px-4 py-2.5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed';
   const variants = {
