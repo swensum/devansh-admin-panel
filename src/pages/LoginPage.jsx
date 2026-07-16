@@ -49,12 +49,12 @@ export default function LoginPage() {
         <div className="bg-surface border border-border rounded-xl p-8">
           <div className="mb-8">
             <p className="font-mono text-[11px] tracking-widest text-amber uppercase mb-2">
-              Restricted Access
+              Welcome to Devansh Suppliers
             </p>
             <h1 className="font-display text-2xl font-semibold text-white">
               Devansh Admin
             </h1>
-            <p className="text-sm text-muted mt-1">Sign in to manage the catalog</p>
+            <p className="text-sm text-muted mt-1">Sign in to manage data</p>
           </div>
 
           <form onSubmit={handleSubmit}>
@@ -96,9 +96,7 @@ export default function LoginPage() {
           </form>
         </div>
 
-        <p className="text-center text-xs text-muted mt-6 font-mono">
-          Accounts are created manually in Firebase Console
-        </p>
+        
       </div>
     </div>
   );

@@ -1,21 +1,26 @@
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { v4 as uuidv4 } from 'uuid';
-import { storage } from '../firebase';
+const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
-/** Uploads a product image file and returns its public download URL. */
+/** Uploads a product image file to Cloudinary and returns its public URL. */
 export async function uploadProductImage(file) {
-  const extension = file.name.split('.').pop() || 'jpg';
-  const path = `product_images/${uuidv4()}.${extension}`;
-  const storageRef = ref(storage, path);
-  await uploadBytes(storageRef, file, { contentType: file.type });
-  return getDownloadURL(storageRef);
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', UPLOAD_PRESET);
+
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    throw new Error(err?.error?.message || 'Image upload failed.');
+  }
+
+  const data = await res.json();
+  return data.secure_url;
 }
 
-export async function deleteProductImage(downloadUrl) {
-  try {
-    const storageRef = ref(storage, downloadUrl);
-    await deleteObject(storageRef);
-  } catch {
-    // Image may already be gone — safe to ignore.
-  }
+export async function deleteProductImage() {
+  
 }
