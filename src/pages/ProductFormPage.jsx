@@ -21,6 +21,7 @@ const EMPTY_FORM = {
   finish: '',
   availability: 'In Stock',
   description: '',
+  isTopProduct: false,  
 };
 
 export default function ProductFormPage() {
@@ -58,6 +59,7 @@ export default function ProductFormPage() {
         finish: p.finish ?? '',
         availability: p.availability ?? 'In Stock',
         description: p.description ?? '',
+         isTopProduct: p.isTopProduct ?? false,
       });
       setExistingImageUrl(p.imageUrl ?? null);
       setLoadingProduct(false);
@@ -125,6 +127,7 @@ export default function ProductFormPage() {
         finish: form.finish || null,
         availability: form.availability || null,
         description: form.description || null,
+        isTopProduct: form.isTopProduct,
         imageUrl,
       };
 
@@ -174,7 +177,38 @@ console.log('[ProductFormPage] render at', performance.now());
               </Select>
             </Field>
           </div>
-
+<Field label="Featured">
+  <label className="flex items-center gap-2 text-sm text-muted cursor-pointer select-none">
+    <span className="relative inline-flex items-center justify-center h-5 w-5">
+      <input
+        type="checkbox"
+        checked={form.isTopProduct}
+        onChange={(e) => update('isTopProduct', e.target.checked)}
+        className="peer absolute inset-0 opacity-0 cursor-pointer"
+      />
+      <span
+        className="h-5 w-5 rounded border border-border bg-surface-alt
+                   peer-checked:bg-[#f5ab1e] peer-checked:border-[#f5ab1e]
+                   transition-colors flex items-center justify-center"
+      >
+        {form.isTopProduct && (
+          <svg
+            className="h-3.5 w-3.5 text-black"
+            viewBox="0 0 20 20"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M4 10l4 4 8-8" />
+          </svg>
+        )}
+      </span>
+    </span>
+    Show as "Top Products"
+  </label>
+</Field>
           <div className="grid grid-cols-2 gap-4">
             <Field label="Category">
               <Select value={form.categoryId} onChange={(e) => handleCategoryChange(e.target.value)} required>
