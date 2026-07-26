@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { to: '/companies', label: 'Companies', icon: CompaniesIcon },
   { to: '/types-materials', label: 'Types & Materials', icon: TypesIcon },
   { to: '/orders', label: 'Orders', icon: OrdersIcon },
+  { to: '/reviews', label: 'Reviews', icon: ReviewsIcon },
 ];
 
 export default function Sidebar() {
@@ -67,3 +68,4 @@ function CompaniesIcon() { return <svg {...iconProps()}><rect x="3" y="7" width=
 function TypesIcon() { return <svg {...iconProps()}><path d="m12 2 8 4.5v9L12 20l-8-4.5v-9L12 2Z"/><path d="M12 11v9M4 6.5 12 11l8-4.5"/></svg>; }
 function OrdersIcon() { return <svg {...iconProps()}><path d="M6 3h12l1 4H5l1-4Z"/><path d="M5 7h14l-1.2 12.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8L5 7Z"/></svg>; }
 function LogoutIcon() { return <svg {...iconProps()}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>; }
+function ReviewsIcon() { return <svg {...iconProps()}><path d="m12 2 2.8 6.6L21 9l-5 4.5L17.5 21 12 17.3 6.5 21 8 13.5 3 9l6.2-.4L12 2Z"/></svg>; }
