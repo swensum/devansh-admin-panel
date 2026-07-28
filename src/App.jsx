@@ -12,6 +12,8 @@ import CompaniesPage from './pages/CompaniesPage';
 import TypesMaterialsPage from './pages/TypesMaterialsPage';
 import OrdersPage from './pages/OrdersPage';
 import ReviewsPage from './pages/ReviewsPage';
+import BlogsPage from './pages/blogpage';
+import BlogFormPage from './pages/Blogformpage';
 
 export default function App() {
   return (
@@ -35,6 +37,9 @@ export default function App() {
           <Route path="/types-materials" element={<TypesMaterialsPage />} />
           <Route path="/orders" element={<OrdersPage />} />
           <Route path="/reviews" element={<ReviewsPage />} />
+           <Route path="/blogs" element={<BlogsPage />} />
+           <Route path="/blogs/new" element={<BlogFormPage />} />
+<Route path="/blogs/:id/edit" element={<BlogFormPage />} />
         </Route>
       </Routes>
     </AuthProvider>
