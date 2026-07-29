@@ -16,6 +16,7 @@ const EMPTY_FORM = {
   excerpt: '',
   content: '',
   status: 'draft',
+  faqs: [],
 };
 
 function slugify(value) {
@@ -51,6 +52,7 @@ export default function BlogFormPage() {
         excerpt: post.excerpt ?? '',
         content: post.content ?? '',
         status: post.status ?? 'draft',
+        faqs: Array.isArray(post.faqs) ? post.faqs : [],
       });
       setSlugTouched(true);
       setExistingImageUrl(post.coverImage ?? null);
@@ -74,6 +76,21 @@ export default function BlogFormPage() {
   function handleSlugChange(value) {
     setSlugTouched(true);
     update('slug', value);
+  }
+
+  function addFaq() {
+    setForm((f) => ({ ...f, faqs: [...f.faqs, { question: '', answer: '' }] }));
+  }
+
+  function updateFaq(index, field, value) {
+    setForm((f) => ({
+      ...f,
+      faqs: f.faqs.map((faq, i) => (i === index ? { ...faq, [field]: value } : faq)),
+    }));
+  }
+
+  function removeFaq(index) {
+    setForm((f) => ({ ...f, faqs: f.faqs.filter((_, i) => i !== index) }));
   }
 
   function handleImageSelect(e) {
@@ -108,6 +125,9 @@ export default function BlogFormPage() {
         content: form.content || null,
         status: form.status,
         coverImage,
+        faqs: form.faqs
+          .map((f) => ({ question: f.question.trim(), answer: f.answer.trim() }))
+          .filter((f) => f.question && f.answer),
       };
 
       if (isEdit) {
@@ -173,6 +193,56 @@ export default function BlogFormPage() {
               placeholder="Write the full post here."
             />
           </Field>
+
+          <div className="mt-2">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-medium text-white">FAQs</p>
+              <Button type="button" variant="secondary" className="px-3 py-1.5" onClick={addFaq}>
+                + Add FAQ
+              </Button>
+            </div>
+
+            {form.faqs.length === 0 ? (
+              <p className="text-sm text-muted">
+                No FAQs yet. Add a question and answer to show below the post.
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {form.faqs.map((faq, index) => (
+                  <div
+                    key={index}
+                    className="border border-border rounded-md p-4 bg-surface-alt/40"
+                  >
+                    <div className="flex items-start justify-between gap-3 mb-3">
+                      <p className="text-xs text-muted mt-2">FAQ {index + 1}</p>
+                      <Button
+                        type="button"
+                        variant="danger"
+                        className="px-3 py-1.5"
+                        onClick={() => removeFaq(index)}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                    <Field label="Question">
+                      <Input
+                        value={faq.question}
+                        onChange={(e) => updateFaq(index, 'question', e.target.value)}
+                        placeholder="e.g. How often should I clean the filters?"
+                      />
+                    </Field>
+                    <Field label="Answer">
+                      <Textarea
+                        value={faq.answer}
+                        onChange={(e) => updateFaq(index, 'answer', e.target.value)}
+                        placeholder="Write the answer here."
+                      />
+                    </Field>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </Card>
 
         <div className="space-y-6">
