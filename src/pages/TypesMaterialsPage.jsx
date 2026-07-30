@@ -3,8 +3,8 @@ import { PageHeader } from '../components/Layout';
 import LookupManager from '../components/LookupManager';
 
 const TABS = [
-  { key: 'types', label: 'Types', collectionPath: 'productTypes', itemLabel: 'Type' },
-  { key: 'materials', label: 'Materials', collectionPath: 'materials', itemLabel: 'Material' },
+  { key: 'types', label: 'Types', collectionPath: 'productTypes', itemLabel: 'Type', scopedToCategory: true },
+  { key: 'materials', label: 'Materials', collectionPath: 'materials', itemLabel: 'Material', scopedToCategory: false },
 ];
 
 export default function TypesMaterialsPage() {
@@ -34,7 +34,11 @@ export default function TypesMaterialsPage() {
         ))}
       </div>
 
-      <LookupManager collectionPath={tab.collectionPath} itemLabel={tab.itemLabel} scopedToCategory />
+      <LookupManager
+        collectionPath={tab.collectionPath}
+        itemLabel={tab.itemLabel}
+        scopedToCategory={tab.scopedToCategory}
+      />
     </>
   );
 }

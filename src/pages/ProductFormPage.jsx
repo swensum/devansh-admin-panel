@@ -17,12 +17,16 @@ const EMPTY_FORM = {
   materialId: '',
   thickness: '',
   size: '',
+  countryOfOrigin: '',
   quantity: '',
   finish: '',
   availability: 'In Stock',
   description: '',
   isTopProduct: false,  
 };
+const COUNTRIES = [
+  'China', 'India', 'Nepal', 
+];
 
 export default function ProductFormPage() {
   const { id } = useParams();
@@ -53,6 +57,7 @@ export default function ProductFormPage() {
         companyId: p.companyId ?? '',
         typeId: p.typeId ?? '',
         materialId: p.materialId ?? '',
+        countryOfOrigin: p.countryOfOrigin ?? '',
         thickness: p.thickness ?? '',
         size: p.size ?? '',
         quantity: p.quantity ?? '',
@@ -72,10 +77,7 @@ export default function ProductFormPage() {
     () => types.filter((t) => t.categoryId === form.categoryId),
     [types, form.categoryId]
   );
-  const materialsForCategory = useMemo(
-    () => materials.filter((m) => m.categoryId === form.categoryId),
-    [materials, form.categoryId]
-  );
+  
 
   function update(field, value) {
     setForm((f) => ({ ...f, [field]: value }));
@@ -83,7 +85,7 @@ export default function ProductFormPage() {
 
   function handleCategoryChange(categoryId) {
     // Reset dependent fields — same behavior as the storefront sidebar.
-    setForm((f) => ({ ...f, categoryId, typeId: '', materialId: '' }));
+    setForm((f) => ({ ...f, categoryId, typeId: '' }));
   }
 
   function handleImageSelect(e) {
@@ -97,8 +99,8 @@ export default function ProductFormPage() {
     e.preventDefault();
     setError(null);
 
-    if (!form.name.trim() || !form.price || !form.categoryId) {
-      setError('Name, price, and category are required.');
+    if (!form.name.trim()  || !form.categoryId) {
+      setError('Name,  and category are required.');
       return;
     }
     if (!isEdit && !imageFile) {
@@ -116,11 +118,12 @@ export default function ProductFormPage() {
 
       const payload = {
         name: form.name.trim(),
-        price: Number(form.price),
+        price: form.price ? Number(form.price) : null,
         categoryId: form.categoryId,
         companyId: form.companyId || null,
         typeId: form.typeId || null,
         materialId: form.materialId || null,
+        countryOfOrigin: form.countryOfOrigin || null,
         thickness: form.thickness || null,
         size: form.size || null,
         quantity: form.quantity || null,
@@ -166,7 +169,7 @@ console.log('[ProductFormPage] render at', performance.now());
                 min="0"
                 value={form.price}
                 onChange={(e) => update('price', e.target.value)}
-                required
+                
               />
             </Field>
             <Field label="Availability">
@@ -241,14 +244,13 @@ console.log('[ProductFormPage] render at', performance.now());
                 ))}
               </Select>
             </Field>
-            <Field label="Material">
+           <Field label="Material">
               <Select
                 value={form.materialId}
                 onChange={(e) => update('materialId', e.target.value)}
-                disabled={!form.categoryId}
               >
                 <option value="">None</option>
-                {materialsForCategory.map((m) => (
+                {materials.map((m) => (
                   <option key={m.id} value={m.id}>{m.name}</option>
                 ))}
               </Select>
@@ -267,10 +269,22 @@ console.log('[ProductFormPage] render at', performance.now());
             </Field>
           </div>
 
-          <Field label="Finish">
-            <Input value={form.finish} onChange={(e) => update('finish', e.target.value)} />
-          </Field>
-
+<div className="grid grid-cols-2 gap-4">
+            <Field label="Finish">
+              <Input value={form.finish} onChange={(e) => update('finish', e.target.value)} />
+            </Field>
+            <Field label="Country of Origin">
+              <Select
+                value={form.countryOfOrigin}
+                onChange={(e) => update('countryOfOrigin', e.target.value)}
+              >
+                <option value="">Select country</option>
+                {COUNTRIES.map((country) => (
+                  <option key={country} value={country}>{country}</option>
+                ))}
+              </Select>
+            </Field>
+          </div>
           <Field label="Description">
             <Textarea value={form.description} onChange={(e) => update('description', e.target.value)} />
           </Field>
