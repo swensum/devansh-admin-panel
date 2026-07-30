@@ -286,7 +286,15 @@ console.log('[ProductFormPage] render at', performance.now());
             </Field>
           </div>
           <Field label="Description">
-            <Textarea value={form.description} onChange={(e) => update('description', e.target.value)} />
+            <Textarea
+              value={form.description}
+              onChange={(e) => update('description', e.target.value)}
+              rows={12}
+            />
+            <p className="text-xs text-muted mt-1.5">
+              Supports Markdown: <code># Heading</code>, <code>**bold**</code>,{' '}
+              <code>- bullet</code>, and tables (see example below the form).
+            </p>
           </Field>
         </Card>
 
