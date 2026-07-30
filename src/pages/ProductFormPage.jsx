@@ -22,11 +22,18 @@ const EMPTY_FORM = {
   finish: '',
   availability: 'In Stock',
   description: '',
-  isTopProduct: false,  
+  isTopProduct: false,
+  variants: [],
 };
+
 const COUNTRIES = [
-  'China', 'India', 'Nepal', 
+  'China', 'India', 'Nepal',
 ];
+
+// Categories whose products are chosen by model/size (width x depth x height)
+// instead of a single fixed size — e.g. kitchen baskets/accessories.
+// Match is case-insensitive against the category's name.
+const VARIANT_CATEGORY_NAMES = ['kitchen accessories', 'kitchen baskets'];
 
 export default function ProductFormPage() {
   const { id } = useParams();
@@ -64,28 +71,60 @@ export default function ProductFormPage() {
         finish: p.finish ?? '',
         availability: p.availability ?? 'In Stock',
         description: p.description ?? '',
-         isTopProduct: p.isTopProduct ?? false,
+        isTopProduct: p.isTopProduct ?? false,
+        variants: p.variants ?? [],
       });
       setExistingImageUrl(p.imageUrl ?? null);
       setLoadingProduct(false);
     });
   }, [id, isEdit]);
 
-  // Types & materials are scoped to the selected category, same as the
-  // customer-facing storefront.
+  // Types are scoped to the selected category, same as the storefront sidebar.
   const typesForCategory = useMemo(
     () => types.filter((t) => t.categoryId === form.categoryId),
     [types, form.categoryId]
   );
-  
+
+  const selectedCategory = categories.find((c) => c.id === form.categoryId);
+  const isVariantCategory = selectedCategory
+    ? VARIANT_CATEGORY_NAMES.includes(selectedCategory.name.trim().toLowerCase())
+    : false;
 
   function update(field, value) {
     setForm((f) => ({ ...f, [field]: value }));
   }
 
   function handleCategoryChange(categoryId) {
+    const cat = categories.find((c) => c.id === categoryId);
+    const willBeVariant = cat
+      ? VARIANT_CATEGORY_NAMES.includes(cat.name.trim().toLowerCase())
+      : false;
     // Reset dependent fields — same behavior as the storefront sidebar.
-    setForm((f) => ({ ...f, categoryId, typeId: '' }));
+    // Also drop any variants entered before switching to a non-variant category.
+    setForm((f) => ({
+      ...f,
+      categoryId,
+      typeId: '',
+      variants: willBeVariant ? f.variants : [],
+    }));
+  }
+
+  function addVariant() {
+    setForm((f) => ({
+      ...f,
+      variants: [...f.variants, { model: '', width: '', depth: '', height: '', availability: 'In Stock' }],
+    }));
+  }
+
+  function updateVariant(index, field, value) {
+    setForm((f) => ({
+      ...f,
+      variants: f.variants.map((v, i) => (i === index ? { ...v, [field]: value } : v)),
+    }));
+  }
+
+  function removeVariant(index) {
+    setForm((f) => ({ ...f, variants: f.variants.filter((_, i) => i !== index) }));
   }
 
   function handleImageSelect(e) {
@@ -99,8 +138,8 @@ export default function ProductFormPage() {
     e.preventDefault();
     setError(null);
 
-    if (!form.name.trim()  || !form.categoryId) {
-      setError('Name,  and category are required.');
+    if (!form.name.trim() || !form.categoryId) {
+      setError('Name and category are required.');
       return;
     }
     if (!isEdit && !imageFile) {
@@ -124,13 +163,24 @@ export default function ProductFormPage() {
         typeId: form.typeId || null,
         materialId: form.materialId || null,
         countryOfOrigin: form.countryOfOrigin || null,
-        thickness: form.thickness || null,
-        size: form.size || null,
-        quantity: form.quantity || null,
+        thickness: isVariantCategory ? null : form.thickness || null,
+        size: isVariantCategory ? null : form.size || null,
+        quantity: isVariantCategory ? null : form.quantity || null,
         finish: form.finish || null,
         availability: form.availability || null,
         description: form.description || null,
         isTopProduct: form.isTopProduct,
+        variants: isVariantCategory
+          ? form.variants
+              .filter((v) => v.model.trim())
+              .map((v) => ({
+                model: v.model.trim(),
+                width: v.width || null,
+                depth: v.depth || null,
+                height: v.height || null,
+                availability: v.availability || null,
+              }))
+          : [],
         imageUrl,
       };
 
@@ -150,7 +200,7 @@ export default function ProductFormPage() {
   if (loadingProduct) {
     return <div className="py-16 flex justify-center"><Spinner /></div>;
   }
-console.log('[ProductFormPage] render at', performance.now());
+
   return (
     <>
       <PageHeader title={isEdit ? 'Edit Product' : 'Add Product'} />
@@ -169,7 +219,6 @@ console.log('[ProductFormPage] render at', performance.now());
                 min="0"
                 value={form.price}
                 onChange={(e) => update('price', e.target.value)}
-                
               />
             </Field>
             <Field label="Availability">
@@ -180,38 +229,40 @@ console.log('[ProductFormPage] render at', performance.now());
               </Select>
             </Field>
           </div>
-<Field label="Featured">
-  <label className="flex items-center gap-2 text-sm text-muted cursor-pointer select-none">
-    <span className="relative inline-flex items-center justify-center h-5 w-5">
-      <input
-        type="checkbox"
-        checked={form.isTopProduct}
-        onChange={(e) => update('isTopProduct', e.target.checked)}
-        className="peer absolute inset-0 opacity-0 cursor-pointer"
-      />
-      <span
-        className="h-5 w-5 rounded border border-border bg-surface-alt
-                   peer-checked:bg-[#f5ab1e] peer-checked:border-[#f5ab1e]
-                   transition-colors flex items-center justify-center"
-      >
-        {form.isTopProduct && (
-          <svg
-            className="h-3.5 w-3.5 text-black"
-            viewBox="0 0 20 20"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M4 10l4 4 8-8" />
-          </svg>
-        )}
-      </span>
-    </span>
-    Show as "Top Products"
-  </label>
-</Field>
+
+          <Field label="Featured">
+            <label className="flex items-center gap-2 text-sm text-muted cursor-pointer select-none">
+              <span className="relative inline-flex items-center justify-center h-5 w-5">
+                <input
+                  type="checkbox"
+                  checked={form.isTopProduct}
+                  onChange={(e) => update('isTopProduct', e.target.checked)}
+                  className="peer absolute inset-0 opacity-0 cursor-pointer"
+                />
+                <span
+                  className="h-5 w-5 rounded border border-border bg-surface-alt
+                             peer-checked:bg-[#f5ab1e] peer-checked:border-[#f5ab1e]
+                             transition-colors flex items-center justify-center"
+                >
+                  {form.isTopProduct && (
+                    <svg
+                      className="h-3.5 w-3.5 text-black"
+                      viewBox="0 0 20 20"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M4 10l4 4 8-8" />
+                    </svg>
+                  )}
+                </span>
+              </span>
+              Show as "Top Products"
+            </label>
+          </Field>
+
           <div className="grid grid-cols-2 gap-4">
             <Field label="Category">
               <Select value={form.categoryId} onChange={(e) => handleCategoryChange(e.target.value)} required>
@@ -244,7 +295,7 @@ console.log('[ProductFormPage] render at', performance.now());
                 ))}
               </Select>
             </Field>
-           <Field label="Material">
+            <Field label="Material">
               <Select
                 value={form.materialId}
                 onChange={(e) => update('materialId', e.target.value)}
@@ -257,19 +308,76 @@ console.log('[ProductFormPage] render at', performance.now());
             </Field>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
-            <Field label="Thickness">
-              <Input value={form.thickness} onChange={(e) => update('thickness', e.target.value)} />
-            </Field>
-            <Field label="Size">
-              <Input value={form.size} onChange={(e) => update('size', e.target.value)} />
-            </Field>
-            <Field label="Quantity">
-              <Input value={form.quantity} onChange={(e) => update('quantity', e.target.value)} />
-            </Field>
-          </div>
+          {isVariantCategory ? (
+            <div className="mt-2">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-medium text-muted">
+                  Model Variants — width × depth × height
+                </p>
+                <Button type="button" variant="secondary" onClick={addVariant}>
+                  + Add Model
+                </Button>
+              </div>
+              {form.variants.length === 0 && (
+                <p className="text-xs text-muted mb-2">
+                  No models added yet. Add at least one size/model customers can choose.
+                </p>
+              )}
+              {form.variants.map((v, i) => (
+                <div
+                  key={i}
+                  className="grid grid-cols-[1.3fr_0.8fr_0.8fr_0.8fr_1fr_auto] gap-2 mb-2 items-end"
+                >
+                  <Field label="Model">
+                    <Input value={v.model} onChange={(e) => updateVariant(i, 'model', e.target.value)} />
+                  </Field>
+                  <Field label="Width">
+                    <Input value={v.width} onChange={(e) => updateVariant(i, 'width', e.target.value)} />
+                  </Field>
+                  <Field label="Depth">
+                    <Input value={v.depth} onChange={(e) => updateVariant(i, 'depth', e.target.value)} />
+                  </Field>
+                  <Field label="Height">
+                    <Input value={v.height} onChange={(e) => updateVariant(i, 'height', e.target.value)} />
+                  </Field>
+                  <Field label="Availability">
+                    <Select
+                      value={v.availability}
+                      onChange={(e) => updateVariant(i, 'availability', e.target.value)}
+                    >
+                      <option>In Stock</option>
+                      <option>Out of Stock</option>
+                      <option>Limited Stock</option>
+                    </Select>
+                  </Field>
+                  <Field label="">
+                    <button
+                      type="button"
+                      onClick={() => removeVariant(i)}
+                      className="h-9 w-9 flex items-center justify-center rounded-md border border-border text-muted hover:text-white hover:border-danger transition-colors"
+                      aria-label="Remove model"
+                    >
+                      ✕
+                    </button>
+                  </Field>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 gap-4">
+              <Field label="Thickness">
+                <Input value={form.thickness} onChange={(e) => update('thickness', e.target.value)} />
+              </Field>
+              <Field label="Size">
+                <Input value={form.size} onChange={(e) => update('size', e.target.value)} />
+              </Field>
+              <Field label="Quantity">
+                <Input value={form.quantity} onChange={(e) => update('quantity', e.target.value)} />
+              </Field>
+            </div>
+          )}
 
-<div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <Field label="Finish">
               <Input value={form.finish} onChange={(e) => update('finish', e.target.value)} />
             </Field>
@@ -285,6 +393,7 @@ console.log('[ProductFormPage] render at', performance.now());
               </Select>
             </Field>
           </div>
+
           <Field label="Description">
             <Textarea
               value={form.description}
