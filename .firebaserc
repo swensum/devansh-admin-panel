@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "devansh-supplers"
+  },
+  "targets": {
+    "devansh-supplers": {
+      "hosting": {
+        "admin": [
+          "devansh-supplers-admin"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
