@@ -46,7 +46,6 @@ service firebase.storage {
 npm install
 npm run dev
 ```
-Opens at http://localhost:5173. Sign in with the user you created in step 1.3.
 
 ## 5. Firestore schema
 ```
